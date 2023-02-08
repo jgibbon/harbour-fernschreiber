@@ -32,6 +32,7 @@ ListItem {
     property int messageIndex
     property int messageViewCount
     property var myMessage
+    property var messageAlbumMessageIds
     property var reactions
     property bool canReplyToMessage
     readonly property bool isAnonymous: myMessage.sender_id["@type"] === "messageSenderChat"
@@ -66,7 +67,7 @@ ListItem {
     readonly property bool haveSpaceForDeleteMessageMenuItem: (baseContextMenuItemCount + 3 - (deleteMessageIsOnlyExtraOption ? 1 : 0)) <= maxContextMenuItemCount
     property var messageReactions
 
-    highlighted: (down || isSelected || additionalOptionsOpened) && !menuOpen
+    highlighted: (down || (isSelected && messageAlbumMessageIds.length === 0) || additionalOptionsOpened) && !menuOpen
     openMenuOnPressAndHold: !messageListItem.precalculatedValues.pageIsSelecting
 
     signal replyToMessage()
@@ -218,20 +219,20 @@ ListItem {
     Connections {
         target: chatModel
         onMessagesReceived: {
-            messageBackground.isUnread = index > chatModel.getLastReadMessageIndex() && myMessage['@type'] !== "sponsoredMessage";
+            messageBackground.isUnread = messageIndex > chatModel.getLastReadMessageIndex() && myMessage['@type'] !== "sponsoredMessage";
         }
         onMessagesIncrementalUpdate: {
-            messageBackground.isUnread = index > chatModel.getLastReadMessageIndex() && myMessage['@type'] !== "sponsoredMessage";
+            messageBackground.isUnread = messageIndex > chatModel.getLastReadMessageIndex() && myMessage['@type'] !== "sponsoredMessage";
         }
         onNewMessageReceived: {
-            messageBackground.isUnread = index > chatModel.getLastReadMessageIndex() && myMessage['@type'] !== "sponsoredMessage";
+            messageBackground.isUnread = messageIndex > chatModel.getLastReadMessageIndex() && myMessage['@type'] !== "sponsoredMessage";
         }
         onUnreadCountUpdated: {
-            messageBackground.isUnread = index > chatModel.getLastReadMessageIndex() && myMessage['@type'] !== "sponsoredMessage";
+            messageBackground.isUnread = messageIndex > chatModel.getLastReadMessageIndex() && myMessage['@type'] !== "sponsoredMessage";
         }
         onLastReadSentMessageUpdated: {
-            Debug.log("[ChatModel] Messages in this chat were read, new last read: ", lastReadSentIndex, ", updating description for index ", index, ", status: ", (index <= lastReadSentIndex));
-            messageDateText.text = getMessageStatusText(myMessage, index, lastReadSentIndex, messageDateText.useElapsed);
+            Debug.log("[ChatModel] Messages in this chat were read, new last read: ", lastReadSentIndex, ", updating description for index ", index, ", status: ", (messageIndex <= lastReadSentIndex));
+            messageDateText.text = getMessageStatusText(myMessage, messageIndex, lastReadSentIndex, messageDateText.useElapsed);
         }
     }
 
@@ -252,7 +253,7 @@ ListItem {
                     pageStack.currentPage === chatPage) {
                 Debug.log("Available reactions for this message: " + reactions);
                 messageListItem.messageReactions = reactions;
-                showItemCompletelyTimer.requestedIndex = index;
+                showItemCompletelyTimer.requestedIndex = messageIndex;
                 showItemCompletelyTimer.start();
             } else {
                 messageListItem.messageReactions = null;
@@ -270,7 +271,7 @@ ListItem {
         interval: 200
         triggeredOnStart: false
         onTriggered: {
-            if (requestedIndex === index) {
+            if (requestedIndex === messageIndex) {
                 chatView.highlightMoveDuration = -1;
                 chatView.highlightResizeDuration = -1;
                 chatView.scrollToIndex(requestedIndex);
@@ -305,8 +306,10 @@ ListItem {
         onTriggered: {
             if (messageListItem.hasContentComponent) {
                 var type = myMessage.content["@type"];
+                var albumComponentPart = (myMessage.media_album_id !== "0" && ['messagePhoto', 'messageVideo'].indexOf(type) !== -1) ? 'Album' : '';
+                console.log('delegateComponentLoadingTimer', myMessage.media_album_id, albumComponentPart)
                 extraContentLoader.setSource(
-                            "../components/messageContent/" + type.charAt(0).toUpperCase() + type.substring(1) + ".qml",
+                            "../components/messageContent/" + type.charAt(0).toUpperCase() + type.substring(1) + albumComponentPart + ".qml",
                             {
                                 messageListItem: messageListItem
                             })
@@ -368,7 +371,7 @@ ListItem {
                 }
                 height: messageTextColumn.height + precalculatedValues.paddingMediumDouble
                 width: precalculatedValues.backgroundWidth
-                property bool isUnread: index > chatModel.getLastReadMessageIndex() && myMessage['@type'] !== "sponsoredMessage"
+                property bool isUnread: messageIndex > chatModel.getLastReadMessageIndex() && myMessage['@type'] !== "sponsoredMessage"
                 color: Theme.colorScheme === Theme.LightOnDark ? (isUnread ? Theme.secondaryHighlightColor : Theme.secondaryColor) : (isUnread ? Theme.backgroundGlowColor : Theme.overlayBackgroundColor)
                 radius: parent.width / 50
                 opacity: isUnread ? 0.5 : 0.2
@@ -390,7 +393,13 @@ ListItem {
                     id: userText
 
                     width: parent.width
-                    text: messageListItem.isOwnMessage ? qsTr("You") : Emoji.emojify( myMessage['@type'] === "sponsoredMessage" ? tdLibWrapper.getChat(myMessage.sponsor_chat_id).title : ( messageListItem.isAnonymous ? page.chatInformation.title : Functions.getUserName(messageListItem.userInformation) ), font.pixelSize)
+                    text: messageListItem.isOwnMessage
+                          ? qsTr("You")
+                          : Emoji.emojify( myMessage['@type'] === "sponsoredMessage"
+                                          ? tdLibWrapper.getChat(myMessage.sponsor_chat_id).title
+                                          : ( messageListItem.isAnonymous
+                                                ? page.chatInformation.title
+                                                : Functions.getUserName(messageListItem.userInformation) ), font.pixelSize)
                     font.pixelSize: Theme.fontSizeExtraSmall
                     font.weight: Font.ExtraBold
                     color: messageListItem.textColor
@@ -568,7 +577,8 @@ ListItem {
                     id: extraContentLoader
                     width: parent.width
                     asynchronous: true
-                    height: item ? item.height : (messageListItem.hasContentComponent ? chatView.getContentComponentHeight(model.content_type, myMessage.content, width) : 0)
+                    readonly property var defaultExtraContentHeight: messageListItem.hasContentComponent ? chatView.getContentComponentHeight(model.content_type, myMessage.content, width, model.album_message_ids.length) : 0
+                    height: item ? item.height : defaultExtraContentHeight
                 }
 
                 Binding {
@@ -593,7 +603,7 @@ ListItem {
                     running: true
                     repeat: true
                     onTriggered: {
-                        messageDateText.text = getMessageStatusText(myMessage, index, chatView.lastReadSentIndex, messageDateText.useElapsed);
+                        messageDateText.text = getMessageStatusText(myMessage, messageIndex, chatView.lastReadSentIndex, messageDateText.useElapsed);
                     }
                 }
 
@@ -606,13 +616,13 @@ ListItem {
                     font.pixelSize: Theme.fontSizeTiny
                     color: messageListItem.isOwnMessage ? Theme.secondaryHighlightColor : Theme.secondaryColor
                     horizontalAlignment: messageListItem.textAlign
-                    text: getMessageStatusText(myMessage, index, chatView.lastReadSentIndex, messageDateText.useElapsed)
+                    text: getMessageStatusText(myMessage, messageIndex, chatView.lastReadSentIndex, messageDateText.useElapsed)
                     MouseArea {
                         anchors.fill: parent
                         enabled: !messageListItem.precalculatedValues.pageIsSelecting
                         onClicked: {
                             messageDateText.useElapsed = !messageDateText.useElapsed;
-                            messageDateText.text = getMessageStatusText(myMessage, index, chatView.lastReadSentIndex, messageDateText.useElapsed);
+                            messageDateText.text = getMessageStatusText(myMessage, messageIndex, chatView.lastReadSentIndex, messageDateText.useElapsed);
                         }
                     }
                 }

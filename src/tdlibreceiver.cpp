@@ -187,7 +187,7 @@ void TDLibReceiver::receiverLoop()
       const char *result = td_json_client_receive(this->tdLibClient, WAIT_TIMEOUT);
       if (result) {
           QJsonDocument receivedJsonDocument = QJsonDocument::fromJson(QByteArray(result));
-          VERBOSE("Raw result:" << receivedJsonDocument.toJson(QJsonDocument::Indented).constData());
+//          VERBOSE("Raw result:" << receivedJsonDocument.toJson(QJsonDocument::Indented).constData());
           processReceivedDocument(receivedJsonDocument);
       }
     }

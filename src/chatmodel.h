@@ -43,6 +43,8 @@ public:
     Q_INVOKABLE void triggerLoadMoreFuture();
     Q_INVOKABLE QVariantMap getChatInformation();
     Q_INVOKABLE QVariantMap getMessage(int index);
+    Q_INVOKABLE QVariantList getMessageIdsForAlbum(qlonglong albumId);
+    Q_INVOKABLE QVariantList getMessagesForAlbum(qlonglong albumId, int startAt);
     Q_INVOKABLE int getLastReadMessageIndex();
     Q_INVOKABLE void setSearchQuery(const QString newSearchQuery);
 
@@ -83,6 +85,10 @@ private:
     void insertMessages(const QList<MessageData*> newMessages);
     void appendMessages(const QList<MessageData*> newMessages);
     void prependMessages(const QList<MessageData*> newMessages);
+    void updateAlbumMessages(qlonglong albumId, bool checkDeleted);
+    void updateAlbumMessages(QList<qlonglong> albumIds, bool checkDeleted);
+    void setMessagesAlbum(const QList<MessageData*> newMessages);
+    void setMessagesAlbum(MessageData *message);
     QVariantMap enhanceMessage(const QVariantMap &message);
     int calculateLastKnownMessageId();
     int calculateLastReadSentMessageId();
@@ -93,6 +99,7 @@ private:
     TDLibWrapper *tdLibWrapper;
     QList<MessageData*> messages;
     QHash<qlonglong,int> messageIndexMap;
+    QHash<qlonglong, QVariantList> albumMessageMap;
     QVariantMap chatInformation;
     qlonglong chatId;
     bool inReload;
