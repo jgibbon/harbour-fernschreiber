@@ -624,10 +624,9 @@ Page {
             }
 
             chatView.lastReadSentIndex = lastReadSentIndex;
-            Debug.log("[ChatPage] We should  ", modelIndex, proxyIndex)
             chatView.scrollToIndex(proxyIndex);
             chatPage.loading = false;
-            if (chatOverviewItem.visible && proxyIndex >= (chatView.count - 10)) { // TODO don't use modelIndex but proxy
+            if (chatOverviewItem.visible && proxyIndex >= (chatView.count - 10)) {
                 chatView.inCooldown = true;
                 chatModel.triggerLoadMoreFuture();
             }
