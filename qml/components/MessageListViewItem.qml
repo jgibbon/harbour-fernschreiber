@@ -78,9 +78,29 @@ ListItem {
     function deleteMessage() {
         var chatId = page.chatInformation.id
         var messageId = myMessage.id
-        Remorse.itemAction(messageListItem, qsTr("Message deleted"), function() {
-            tdLibWrapper.deleteMessages(chatId, [ messageId ]);
-        })
+        if(isOwnMessage) {
+            Remorse.itemAction(messageListItem, qsTr("Message deleted"), function() {
+                tdLibWrapper.deleteMessages(chatId, [ messageId ]);
+            })
+        } else {
+            // show deletion dialog…
+            // message
+            // if supergroup: option reportSupergroupSpam
+            // if supergroup or basic group banChatMember
+//                - sub option: delete all messages…
+
+            var dialog = pageStack.push(Qt.resolvedUrl("../pages/DeleteGroupMessagePage.qml"), {
+//                myUserId: chatPage.myUserId,
+                message: myMessage, // messageListItem.chatId
+                chatInformation: page.chatInformation
+                //chatId: messageListItem.chatId, message:chat_id
+            })
+            dialog.accepted.connect(function(values) {
+                Remorse.itemAction(messageListItem, qsTr("Message deleted"), function() {
+                    tdLibWrapper.deleteMessages(chatId, [ messageId ]);
+                })
+            })
+        }
     }
 
     function copyMessageToClipboard() {
