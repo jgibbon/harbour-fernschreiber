@@ -16,19 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with Fernschreiber. If not, see <http://www.gnu.org/licenses/>.
 */
-// jolla-gallery/pages/FlickableImageView.qml
-/*
 
-FullscreenContentPage
-    - PagedView (jolla-gallery/FlickableImageView)
-        - delegate: Loader
-            - SilicaFlickable (Silica.private/ZoomableFlickable) (Sailfish.Gallery/ImageViewer)
-                - PinchArea
-                    - dragDetector(?)
-                    - image
-        - Item (Sailfish.Gallery/GalleryOverlay)
-
-*/
 
 import QtQuick 2.6
 import Sailfish.Silica 1.0
@@ -55,6 +43,7 @@ Page {
     backgroundColor: 'black'
     allowedOrientations: Orientation.All
     // signal declarations
+
     // JavaScript functions
 
     // object (parent) properties
@@ -104,6 +93,5 @@ Page {
         pageCount: messages.length
         currentIndex: page.index
         message: messages[currentIndex]
-//
     }
 }

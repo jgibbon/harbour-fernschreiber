@@ -797,7 +797,11 @@ Page {
             NamedAction {
                 visible: messageOptionsDrawer.showCopyMessageToClipboardMenuItem
                 name: qsTr("Copy Message to Clipboard")
-                action: messageOptionsDrawer.sourceItem.copyMessageToClipboard
+                action: {
+                    if(messageOptionsDrawer.sourceItem) {
+                        messageOptionsDrawer.sourceItem.copyMessageToClipboard()
+                    }
+                }
             },
             NamedAction {
                 visible: messageOptionsDrawer.showForwardMessageMenuItem && messageOptionsDrawer.myMessage.can_be_forwarded
@@ -821,7 +825,11 @@ Page {
             NamedAction {
                 visible: messageOptionsDrawer.showDeleteMessageMenuItem
                 name: qsTr("Delete Message")
-                action: messageOptionsDrawer.sourceItem.deleteMessage
+                action: {
+                    if(messageOptionsDrawer.sourceItem) {
+                        messageOptionsDrawer.sourceItem.deleteMessage()
+                    }
+                }
             }
         ]
 
