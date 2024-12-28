@@ -43,7 +43,6 @@ Page {
     backgroundColor: 'black'
     allowedOrientations: Orientation.All
     // signal declarations
-
     // JavaScript functions
 
     // object (parent) properties

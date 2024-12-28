@@ -19,7 +19,6 @@
 import QtQuick 2.6
 import QtGraphicalEffects 1.0
 import WerkWolf.Fernschreiber 1.0
-
 import Sailfish.Silica 1.0
 import "../../../js/functions.js" as Functions
 import "../../../js/twemoji.js" as Emoji
@@ -46,7 +45,6 @@ Item {
     // child objects
     // states
     // transitions
-
 
     onActiveChanged: {
         console.log('overlay active', active)
@@ -285,18 +283,6 @@ Item {
                  }
              }
 
-
-//             ProgressCircle {
-//                 value: file.downloadedSize / file.expectedSize
-//                 progressColor: Theme.highlightColor
-//                 backgroundColor: Theme.highlightDimmerColor
-//                 width: Theme.iconSizeMedium
-//                 height: Theme.iconSizeMedium
-//                 visible: opacity > 0
-//                 opacity: file.isDownloadingActive ? 1.0 : 0.0
-//                 anchors.centerIn: parent
-//                 Behavior on opacity { FadeAnimation {} }
-//             }
          }
         Item {
             width: Theme.itemSizeSmall
