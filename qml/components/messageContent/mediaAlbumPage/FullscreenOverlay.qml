@@ -141,7 +141,7 @@ Item {
                 rightMargin: Theme.paddingLarge
                 right: parent.right
                 top: parent.top
-                topMargin: Theme.horizontalPageMargin
+                topMargin: (!!Screen.hasCutouts && pageStack.currentPage.orientation === Orientation.Portrait) ? Screen.topCutout.height : Theme.horizontalPageMargin
             }
 
             Behavior on height { NumberAnimation {duration: 300} }

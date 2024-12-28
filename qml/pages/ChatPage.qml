@@ -811,7 +811,7 @@ Page {
                 }
             },
             NamedAction {
-                visible: canPinMessages()
+                visible: !!canPinMessages()
                 name: messageOptionsDrawer.myMessage.is_pinned ? qsTr("Unpin Message") : qsTr("Pin Message")
                 action: function () {
                     if (messageOptionsDrawer.myMessage.is_pinned) {
@@ -1012,7 +1012,7 @@ Page {
                 Row {
                     id: headerRow
                     width: parent.width - (3 * Theme.horizontalPageMargin)
-                    height: chatOverviewItem.height + ( chatPage.isPortrait ? (2 * Theme.paddingMedium) : (2 * Theme.paddingSmall) )
+                    height: chatOverviewItem.height + ( chatPage.isPortrait ? ( Theme.paddingMedium + (!!Screen.hasCutouts && pageStack.currentPage.orientation === Orientation.Portrait) ? Screen.topCutout.height : Theme.paddingMedium) : (2 * Theme.paddingSmall) )
                     anchors.horizontalCenter: parent.horizontalCenter
                     spacing: Theme.paddingMedium
 
