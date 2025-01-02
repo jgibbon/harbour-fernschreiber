@@ -1012,7 +1012,11 @@ Page {
                 Row {
                     id: headerRow
                     width: parent.width - (3 * Theme.horizontalPageMargin)
-                    height: chatOverviewItem.height + ( chatPage.isPortrait ? ( Theme.paddingMedium + (!!Screen.hasCutouts && pageStack.currentPage.orientation === Orientation.Portrait) ? Screen.topCutout.height : Theme.paddingMedium) : (2 * Theme.paddingSmall) )
+                    height: chatOverviewItem.height +
+                            ( chatPage.isPortrait ?
+                                 ( Theme.paddingMedium + (!Screen.hasCutouts ? Theme.paddingMedium : Screen.topCutout.height) )
+                               : Theme.paddingSmall * 2
+                             )
                     anchors.horizontalCenter: parent.horizontalCenter
                     spacing: Theme.paddingMedium
 
