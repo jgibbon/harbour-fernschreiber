@@ -32,7 +32,6 @@ Video {
 
         width: parent.width //don't use anchors here for easier custom scaling
         height: parent.height
-        highlighted: parent.highlighted || false
         thumbnail: videoData.thumbnail
         minithumbnail: videoData.minithumbnail
         fillMode: Image.PreserveAspectFit
